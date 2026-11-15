@@ -1,0 +1,36 @@
+/* Real Grammar Wasm: explicit readings, edited operands, verified print and refusal. */
+const assert=require('node:assert/strict');
+const {pathToFileURL}=require('node:url');
+const path=require('node:path');
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+let browser;
+(async()=>{
+ browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{})});
+ const page=await browser.newPage({viewport:{width:1800,height:1100}}),errors=[],network=[];
+ page.on('pageerror',error=>errors.push(error.message));page.on('request',request=>{if(/^https?:/.test(request.url()))network.push(request.url());});
+ await page.goto(pathToFileURL(path.resolve(process.argv[2]||path.join(__dirname,'../build/index.html'))).href,{timeout:120000});
+ await page.waitForFunction(()=>window.cardBlocks?.valid(),null,{timeout:120000});
+ const before=await page.evaluate(()=>window.cardBlocks.encode(window.cardBlocks.generated()));
+ await page.locator('#oracle-open').click();
+ await page.locator('#oracle-text').fill('Lightning Bolt deals 5 damage to any target.');
+ await page.locator('#oracle-parse').click();
+ await page.locator('#oracle-readings').waitFor({state:'visible',timeout:120000});
+ assert.equal(await page.evaluate(()=>window.cardBlocks.encode(window.cardBlocks.generated())),before,'Parsing must not apply a reading automatically');
+ assert.match(await page.locator('#oracle-preview').textContent(),/5/);
+ await page.locator('#oracle-apply').click();
+ await page.waitForFunction(()=>window.cardBlocks.valid()&&window.cardBlocks.generated().faces[0].abilities[0].args.body.instructions[0].args.operation.args.amount.args===5);
+ await page.evaluate(()=>{const d=window.cardBlocks,card=d.generated();card.faces[0].abilities[0].args.body.instructions[0].args.operation.args.amount.args=7;d.loadIR(card);});
+ await page.waitForFunction(()=>window.cardBlocks.valid());
+ await page.locator('#oracle-open').click();await page.locator('#oracle-print').click();
+ await page.waitForFunction(()=>document.getElementById('oracle-status').textContent.startsWith('Verified'),null,{timeout:120000});
+ assert.match(await page.locator('#oracle-text').inputValue(),/7 damage/);
+ await page.locator('#oracle-text').fill('These are not valid Magic rules gibberish.');await page.locator('#oracle-parse').click();
+ await page.waitForFunction(()=>!document.getElementById('oracle-parse').disabled,null,{timeout:120000});
+ assert.equal(await page.locator('#oracle-readings').isVisible(),false);
+ const badFace=await page.evaluate(async()=>{const d=window.cardBlocks;return d.oracleParse(JSON.stringify({ir:d.encode(d.generated()),face:4294967296,text:'Draw a card.'}));});
+ assert.equal(badFace.valid,false);assert.equal(badFace.status,'refused');
+ await page.locator('#oracle-close').click();
+ assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
+ console.log('Oracle Grammar Wasm parse → explicit reading → blocks → edited verified text; refusal and face bounds passed');
+ await browser.close();browser=null;
+})().catch(async error=>{console.error(error);if(browser)await browser.close();process.exitCode=1;});

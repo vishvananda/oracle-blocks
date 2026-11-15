@@ -1,0 +1,10 @@
+[package]
+name = "oracle-blocks-catalog"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+oracle-ir-contract = { version = "=0.2.1", default-features = false }
+serde_json = { version = "1", features = ["unbounded_depth"] }
+syn = { version = "2", features = ["full"] }

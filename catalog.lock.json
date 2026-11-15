@@ -1,0 +1,10 @@
+{
+  "format_version": 1,
+  "url": "https://github.com/vishvananda/oracle-blocks/releases/download/catalog-s191-mtgish-6b3d9506-r1/cards.jsonl.gz",
+  "sha256": "9a4b3678e1c731f32a342b8f5b1021b2e69598fa4edff7407cf34cae872f1dcd",
+  "records": 33529,
+  "schema_version": 191,
+  "producer": "mtgish",
+  "producer_commit": "a4ca676381065d25b35e865b1d18aecbae0e78d8",
+  "source_sha256": "6b3d950684b75e77df81bb88370a9d1ce518b3c98984367961a771e18500363b"
+}
