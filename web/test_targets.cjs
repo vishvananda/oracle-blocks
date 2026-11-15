@@ -55,8 +55,8 @@ let browser,page;
  assert.deepEqual(await page.evaluate(()=>window.cardBlocks.generated()),initial.ir);
  await page.locator('#details').click();
  // Add the exceptional damage modifier via ⋯, then remove it using its checkbox.
- const menu=await page.evaluate(()=>{const b=window.cardBlocks.workspace.getAllBlocks(false).find(b=>b.state.op==='DealDamage'),r=b.getField('MORE').getSvgRoot().getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};});
- await page.mouse.click(menu.x,menu.y);await page.getByRole('option',{name:"can't be prevented",exact:true}).click();
+ await page.evaluate(async()=>{const d=window.cardBlocks;await Blockly.renderManagement.finishQueuedRenders();d.workspace.zoomToFit();await Blockly.renderManagement.finishQueuedRenders();const b=d.workspace.getAllBlocks(false).find(b=>b.state.op==='DealDamage');b.getField('MORE').getSvgRoot().setAttribute('data-testid','damage-options');});
+ await page.getByTestId('damage-options').click();await page.getByRole('option',{name:"can't be prevented",exact:true}).click();
  await page.waitForFunction(()=>window.cardBlocks.generated().faces[0].abilities[0].args.body.instructions[0].args.operation.args.preventable===false&&window.cardBlocks.valid());
  assert.equal(await page.evaluate(()=>window.cardBlocks.workspace.getAllBlocks(false).find(b=>b.state.op==='DealDamage').getFieldValue('_O_preventable')),'TRUE');
  await page.evaluate(()=>window.cardBlocks.workspace.getAllBlocks(false).find(b=>b.state.op==='DealDamage').setFieldValue('FALSE','_O_preventable'));
