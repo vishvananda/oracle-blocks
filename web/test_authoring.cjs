@@ -69,8 +69,8 @@ let browser,page;
  await page.locator('#details').click();await page.locator('#details').click();
  assert.equal(await page.evaluate(()=>window.cardBlocks.encode(window.cardBlocks.generated())),before);
  // Optional targeting is created on demand rather than an empty announcement block.
- const menu=await page.evaluate(()=>{const b=window.cardBlocks.workspace.getAllBlocks(false).find(b=>b.state.ty.named==='Ability'&&b.state.variant==='Spell'),r=b.getField('MORE').getSvgRoot().getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};});
- await page.mouse.click(menu.x,menu.y);await page.getByText('Add a target',{exact:true}).click();
+ await page.evaluate(async()=>{const d=window.cardBlocks;await Blockly.renderManagement.finishQueuedRenders();d.workspace.zoomToFit();await Blockly.renderManagement.finishQueuedRenders();const b=d.workspace.getAllBlocks(false).find(b=>b.state.ty.named==='Ability'&&b.state.variant==='Spell');b.getField('MORE').getSvgRoot().setAttribute('data-testid','spell-options');});
+ await page.getByTestId('spell-options').click();await page.getByRole('option',{name:'Add a target',exact:true}).click();
  await page.waitForFunction(()=>window.cardBlocks.valid()&&window.cardBlocks.generated().faces[0].abilities[0].args.announcement.targets.length===1);
  assert.equal(await page.evaluate(()=>window.cardBlocks.generated().faces[0].abilities[0].args.announcement.targets[0].count.Exactly.args),1);
  const downloadPromise=page.waitForEvent('download');await page.locator('#export').click();await downloadPromise;

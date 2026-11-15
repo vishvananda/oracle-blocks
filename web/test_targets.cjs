@@ -36,7 +36,7 @@ let browser,page;
   await page.evaluate(async()=>{await Blockly.renderManagement.finishQueuedRenders();window.cardBlocks.workspace.zoomToFit();});
   const point=await page.evaluate(()=>{const b=window.cardBlocks.workspace.getAllBlocks(false).find(b=>b.state.ty.named==='TargetSpec'),r=b.getField('TARGET_PRESET').getSvgRoot().getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};});
   await page.mouse.click(point.x,point.y);await page.getByRole('option',{name:label,exact:true}).click();
-  await page.waitForFunction(kind=>JSON.stringify(window.cardBlocks.generated().faces[0].abilities[0].args.announcement.targets[0].kind)===JSON.stringify(kind)&&window.cardBlocks.valid(),kind);
+  await page.waitForFunction(({kind,filter})=>{const target=window.cardBlocks.generated().faces[0].abilities[0].args.announcement.targets[0];return JSON.stringify(target.kind)===JSON.stringify(kind)&&JSON.stringify(target.filter)===JSON.stringify(filter)&&window.cardBlocks.valid();},{kind,filter});
   const v=await target();assert.deepEqual(v.kind,kind);assert.deepEqual(v.filter,filter);assert.equal(v.players,null);
  }
  // Target-slot changes are local to their ability, and undo restores the full operation.
