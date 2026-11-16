@@ -64,7 +64,7 @@ standalone HTML and retains it as an artifact after these checks.
 
 * [`oracle-grammar`](https://github.com/vishvananda/oracle-grammar) owns AST,
   validation, canonicalization, migrations and Oracle parse/print. This repo pins
-  published `oracle-ir-contract` 0.2.1 and `oracle-ir-grammar` 0.2.1 (schema 191).
+  published `oracle-ir-contract` 0.2.3 and `oracle-ir-grammar` 0.2.11 (schema 191).
 * [`mtgish`](https://github.com/vishvananda/mtgish) owns MTGish → AST lowering and
   comparison with released Grammar data.
 * [`Cantrip tooling`](https://github.com/vishvananda/cantrip-rs/tree/tools/oracle-codegen-20261115/tools)
